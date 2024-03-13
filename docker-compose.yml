@@ -1,0 +1,59 @@
+version: '3.6'
+
+services:
+  pythondemo:
+    image: first_flask_app:1.0
+    build:
+        context: .
+    container_name: first_flask_app
+    # command: flask run --host=0.0.0.0
+    volumes:
+        - $PWD:/app
+    env_file:
+        - .env
+    depends_on:
+      - db
+    environment:
+      - DB_USER=systemadmin
+      - DB_PASSWORD=systemadmin
+      - DB_NAME=first_flask_app
+      - DB_HOST=db
+      - DB_PORT=5432
+    working_dir: /app
+    ports:
+      - 5000:5000
+    # command: ["python", "app.py"]
+    # command: ["app"]
+
+  db:
+      image: postgres:14-alpine
+      container_name: first_flask_app_db
+      ports:
+        - 5600:5432
+      volumes:
+        - db_data:/var/lib/postgresql/data/pgdata
+      environment:
+        - POSTGRES_USER=systemadmin
+        - POSTGRES_PASSWORD=systemadmin
+        - POSTGRES_DB=first_flask_app
+        - PGDATA=/var/lib/postgresql/data/pgdata
+      restart: always
+      command: [
+        "postgres",
+        "-c", "max_connections=100",
+              ]
+
+  # pgadmin:
+  #     container_name: container-pgadmin
+  #     image: dpage/pgadmin4
+  #     depends_on:
+  #       - db
+  #     ports:
+  #       - "5050:80"
+  #     environment:
+  #       PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #       PGADMIN_DEFAULT_PASSWORD: root
+  #     restart: unless-stopped
+      
+volumes:
+  db_data:
